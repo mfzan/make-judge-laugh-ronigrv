@@ -15,8 +15,24 @@ ENTRY = (
     "confidently answering a question I can no longer remember."
 )
 
+# The sealed scorer's gate, mirrored here so a bad entry fails loudly
+# locally instead of silently scoring 0: UTF-8 text, 1-200 characters,
+# not only whitespace.
+MAX_CHARS = 200
+
+
+def validate_entry(text: str) -> None:
+    if not (1 <= len(text) <= MAX_CHARS):
+        raise ValueError(
+            f"entry is {len(text)} chars, must be 1-{MAX_CHARS}"
+        )
+    if not text.strip():
+        raise ValueError("entry must not be only whitespace")
+    text.encode("utf-8")  # must be valid UTF-8
+
 
 def main() -> int:
+    validate_entry(ENTRY)
     # The grader collects /output as another user (65534:65534), so the
     # file itself must be world-readable. Never chmod the /output
     # directory — only the file we write.
